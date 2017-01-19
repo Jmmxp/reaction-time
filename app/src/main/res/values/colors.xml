@@ -6,5 +6,5 @@
     <color name="mainMenu">#FFFFFF</color>
     <color name="startGame">#85A9F0</color>
     <color name="promptClick">#E85DB5</color>
-    <color name="gameOver">#91F657</color>
+    <color name="endGame">#91F657</color>
 </resources>

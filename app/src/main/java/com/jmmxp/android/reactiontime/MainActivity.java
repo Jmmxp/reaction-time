@@ -1,7 +1,9 @@
 package com.jmmxp.android.reactiontime;
 
+import android.content.Intent;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -44,13 +46,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (!mGameStart) {
+                    Log.d(TAG, "Animation should start.");
+
                     mGameStart = true;
 
-                    Log.d(TAG, "Animation should start.");
                     mInstructionTextView.startAnimation(mFadeOut);
-
                     mFadeOut.setDuration(1000);
                     mFadeOut.setFillAfter(true);
+
                     mTransitionDrawable.startTransition(1000);
                     final Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
@@ -60,7 +63,10 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }, mRandomTime);
                 } else {
-
+                    Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                    startActivity(intent);
+                    overridePendingTransition(0, 0);
                 }
 
             }
@@ -69,23 +75,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onTimeReached() {
+
+        final long startTime = SystemClock.elapsedRealtime();
+
         mMainLinearLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.promptClick));
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
+        mMainLinearLayout.setBackground(ContextCompat.getDrawable(this, R.drawable.colour_transition2));
+        mTransitionDrawable = (TransitionDrawable) mMainLinearLayout.getBackground();
+
+        mMainLinearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void run() {
+            public void onClick(View v) {
                 Log.d(TAG, "Game over");
+
+                long endTime = SystemClock.elapsedRealtime();
+                long elapsedMilliSeconds = endTime - startTime;
+                double elapsedSeconds = elapsedMilliSeconds / 1000.0;
+
+                mTransitionDrawable.startTransition(1000);
 
                 mInstructionTextView.startAnimation(mFadeIn);
                 mFadeIn.setDuration(1000);
                 mFadeIn.setFillAfter(true);
-                mInstructionTextView.setText("Game over! Tap the screen to start again.");
 
-                mGameStart = false;
+                mInstructionTextView.setText(elapsedSeconds + " seconds");
+
 
             }
-        }, 200);
-        mMainLinearLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.mainMenu));
+        });
+
     }
 
 }
