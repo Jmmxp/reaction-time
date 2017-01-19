@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="mainMenu">#FFFFFF</color>
+    <color name="startGame">#85A9F0</color>
+    <color name="promptClick">#E85DB5</color>
+    <color name="gameOver">#91F657</color>
+</resources>
