@@ -3,8 +3,10 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="mainMenu">#FFFFFF</color>
-    <color name="startGame">#85A9F0</color>
-    <color name="promptClick">#E85DB5</color>
+    <color name="mainMenu">#85A9F0</color>
+    <color name="startGame">#FFFFFF</color>
+    <color name="earlyClick">#FF7083</color>
+    <color name="promptClick">#F7233F</color>
+    <!-- Darker red. #F7233F; Original pink I used: #E85DB5-->
     <color name="endGame">#91F657</color>
 </resources>
