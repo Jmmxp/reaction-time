@@ -27,9 +27,9 @@ public class MainActivity extends AppCompatActivity {
     private AlphaAnimation mFadeIn = new AlphaAnimation(0.0f, 1.0f);
     private boolean mGameStart = false;
     private boolean mGameOver = false;
+    private boolean mFailScreen = false;
     private int mRandomTime;
     private int mTransitionTime = 500;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,29 +63,32 @@ public class MainActivity extends AppCompatActivity {
                             onTimeReached();
                         }
                     }, mRandomTime);
+
                 }
 
                 mMainLinearLayout.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
-                        mMainLinearLayout.setOnTouchListener(null);
-                        mGameOver = true;
-                        Log.d(TAG, "Game over");
+                        if (!mFailScreen) {
+                            mFailScreen = true;
+                            mMainLinearLayout.setOnTouchListener(null);
+                            mGameOver = true;
+                            Log.d(TAG, "Game over");
 //                        mMainLinearLayout.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.startGame));
-                        mMainLinearLayout.setBackground(ContextCompat.getDrawable(MainActivity.this, R.drawable.colour_transition3));
-                        mTransitionDrawable = (TransitionDrawable) mMainLinearLayout.getBackground();
-                        mTransitionDrawable.startTransition(mTransitionTime);
+                            mMainLinearLayout.setBackground(ContextCompat.getDrawable(MainActivity.this, R.drawable.colour_transition3));
+                            mTransitionDrawable = (TransitionDrawable) mMainLinearLayout.getBackground();
+                            mTransitionDrawable.startTransition(mTransitionTime);
 
-                        animateTextIn("You tapped too early! Try again.");
+                            animateTextIn("You tapped too early! Try again.");
 
-                        final Handler handler = new Handler();
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                setResetOnClickListener();
-                            }
-                        }, mTransitionTime);
-
+                            final Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    setResetOnClickListener();
+                                }
+                            }, mTransitionTime);
+                        }
 
                         return true;
 
@@ -110,24 +113,28 @@ public class MainActivity extends AppCompatActivity {
             mMainLinearLayout.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    mMainLinearLayout.setOnTouchListener(null);
-                    Log.d(TAG, "Game over");
 
-                    long endTime = SystemClock.elapsedRealtime();
-                    long elapsedMilliseconds = endTime - startTime;
-                    // double elapsedSeconds = elapsedMilliSeconds / 1000.0;
+                    if (!mGameOver) {
+                        mGameOver = true;
+                        mMainLinearLayout.setOnTouchListener(null);
+                        Log.d(TAG, "Game over");
 
-                    mTransitionDrawable.startTransition(mTransitionTime);
+                        long endTime = SystemClock.elapsedRealtime();
+                        long elapsedMilliseconds = endTime - startTime;
+                        // double elapsedSeconds = elapsedMilliSeconds / 1000.0;
 
-                    animateTextIn(elapsedMilliseconds + " milliseconds");
+                        mTransitionDrawable.startTransition(mTransitionTime);
 
-                    final Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            setResetOnClickListener();
-                        }
-                    }, mTransitionTime);
+                        animateTextIn(elapsedMilliseconds + " milliseconds");
+
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                setResetOnClickListener();
+                            }
+                        }, mTransitionTime);    
+                    }
 
                     return true;
 

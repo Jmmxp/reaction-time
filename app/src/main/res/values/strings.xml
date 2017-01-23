@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Reaction Time</string>
     <string name="main_instruction_text_view">Press the screen to start the game. Tap the screen when it flashes red.</string>
+    <string name="scoreboard_header"><u>Scores</u></string>
 </resources>
