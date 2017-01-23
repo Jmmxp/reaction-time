@@ -2,6 +2,7 @@ package com.jmmxp.android.reactiontime;
 
 import android.content.Intent;
 import android.graphics.drawable.TransitionDrawable;
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.v4.content.ContextCompat;
@@ -102,6 +103,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void onTimeReached() {
 
+        final MediaPlayer player = MediaPlayer.create(MainActivity.this, R.raw.ding);
+        player.start();
+
         if (!mGameOver) {
 
             final long startTime = SystemClock.elapsedRealtime();
@@ -133,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
                             public void run() {
                                 setResetOnClickListener();
                             }
-                        }, mTransitionTime);    
+                        }, mTransitionTime);
                     }
 
                     return true;
