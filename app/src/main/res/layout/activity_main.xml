@@ -10,10 +10,16 @@
     android:background="@drawable/colour_transition">
 
     <TextView
+        android:id="@+id/scoreboard_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true"
+        android:textStyle="bold"
+        android:padding="20dp"
+        android:textSize="20dp"
+        android:textAlignment="center"
+        android:fontFamily="sans-serif-smallcaps"/>
 
     <TextView
         android:id="@+id/instruction_text_view"
@@ -27,19 +33,6 @@
         android:text="@string/main_instruction_text_view"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"/>
-
-    <!--<android.support.design.widget.FloatingActionButton-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:id="@+id/scoreboard_floating_action_button"-->
-        <!--android:clickable="true"-->
-        <!--app:fabSize="normal"-->
-        <!--app:srcCompat="@drawable/scoreboard"-->
-        <!--android:visibility="gone"-->
-        <!--android:tint="#FAF743"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_margin="16dp"/>-->
 
     <ImageView
         android:layout_width="wrap_content"

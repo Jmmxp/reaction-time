@@ -24,7 +24,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
+    private static final String EXTRA_SCORES = "com.jmmxp.android.reactiontime.scores";
+
     private TextView mInstructionTextView;
+    private TextView mScoreboardTextView;
     private RelativeLayout mMainLayout;
     private ImageView mImageView;
 
@@ -37,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     private int mRandomTime;
     private int mTransitionTime = 500;
 
+    private long[] mScores;
+
     private ScoreDbHelper mDbHelper;
 
     @Override
@@ -46,13 +51,13 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
 
         mImageView = (ImageView) findViewById(R.id.scoreboard_image_view);
-//        mImageView.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FFFFFF")));
         mImageView.setVisibility(View.VISIBLE);
 
         mImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("MainActivity", "IMGE VIEW WAS CLICKED!!");
+                showScoreboard();
             }
         });
 
@@ -61,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
         mInstructionTextView = (TextView) findViewById(R.id.instruction_text_view);
         mMainLayout = (RelativeLayout) findViewById(R.id.main_layout);
+        mScoreboardTextView = (TextView) findViewById(R.id.scoreboard_text_view);
 
         mTransitionDrawable = (TransitionDrawable) mMainLayout.getBackground();
 
@@ -123,8 +129,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        if (savedInstanceState != null) {
+            mScores = (long[]) savedInstanceState.getSerializable(EXTRA_SCORES);
+        } else {
+            mScores = new long[]{0, 0, 0, 0, 0};
+        }
+
+        checkScore();
+
         mDbHelper = new ScoreDbHelper(getApplicationContext());
 
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putSerializable(EXTRA_SCORES, mScores);
     }
 
     private void insertData() {
@@ -154,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
 
                         long endTime = SystemClock.elapsedRealtime();
                         long elapsedMilliseconds = endTime - startTime;
+                        addScore(elapsedMilliseconds);
                         // double elapsedSeconds = elapsedMilliSeconds / 1000.0;
 
                         mTransitionDrawable.startTransition(mTransitionTime);
@@ -175,6 +195,55 @@ public class MainActivity extends AppCompatActivity {
             });
 
         }
+
+    }
+
+    private void addScore(long score) {
+        for (int i = 0; i < mScores.length; i++) {
+            if (mScores[i] == 0) {
+                mScores[i] = score;
+                break;
+            } else if (score < mScores[i]) {
+                for (int j = mScores.length; j > i; j--) {
+                    long secondScore = mScores[j - 1];
+                    mScores[j] = secondScore;
+                }
+                mScores[i] = score;
+            }
+        }
+
+        checkScore();
+
+    }
+
+    private void checkScore() {
+        boolean scoreExists = false;
+        mScoreboardTextView.setText("");
+
+        for (int i = 0; i < mScores.length; i++) {
+            if (mScores[i] != 0) {
+                mScoreboardTextView.setText(mScoreboardTextView.getText().toString() + (i + 1) + ". " + mScores[i] + "\n");
+                scoreExists = true;
+            }
+        }
+
+        if (!scoreExists) {
+            mScoreboardTextView.setText(R.string.empty_scoreboard);
+        }
+    }
+
+    private void showScoreboard() {
+        mScoreboardTextView.setVisibility(View.VISIBLE);
+        mScoreboardTextView.startAnimation(mFadeIn);
+        mFadeIn.setDuration(mTransitionTime);
+        mFadeIn.setFillAfter(true);
+
+        mInstructionTextView.startAnimation(mFadeOut);
+        mFadeOut.setDuration(mTransitionTime);
+        mFadeOut.setFillAfter(true);
+    }
+
+    private void hideScoreboard() {
 
     }
 
