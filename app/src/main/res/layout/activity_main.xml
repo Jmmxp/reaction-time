@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:id="@+id/main_linear_layout"
+    android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     tools:context="com.jmmxp.android.reactiontime.MainActivity"
     android:background="@drawable/colour_transition">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_centerInParent="true"/>
 
     <TextView
         android:id="@+id/instruction_text_view"
@@ -19,6 +24,30 @@
         android:textSize="20dp"
         android:textAlignment="center"
         android:fontFamily="sans-serif-smallcaps"
-        android:text="@string/main_instruction_text_view"/>
+        android:text="@string/main_instruction_text_view"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"/>
 
-</LinearLayout>
+    <!--<android.support.design.widget.FloatingActionButton-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/scoreboard_floating_action_button"-->
+        <!--android:clickable="true"-->
+        <!--app:fabSize="normal"-->
+        <!--app:srcCompat="@drawable/scoreboard"-->
+        <!--android:visibility="gone"-->
+        <!--android:tint="#FAF743"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_margin="16dp"/>-->
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/scoreboard_image_view"
+        android:src="@drawable/scoreboard"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="16dp"/>
+
+</RelativeLayout>

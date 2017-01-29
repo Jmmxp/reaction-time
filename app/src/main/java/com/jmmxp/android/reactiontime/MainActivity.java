@@ -2,9 +2,9 @@ package com.jmmxp.android.reactiontime;
 
 import android.content.Intent;
 import android.graphics.drawable.TransitionDrawable;
-import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,8 +12,11 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.jmmxp.android.reactiontime.data.ScoreDbHelper;
 
 import java.util.Random;
 
@@ -22,7 +25,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     private TextView mInstructionTextView;
-    private LinearLayout mMainLinearLayout;
+    private RelativeLayout mMainLayout;
+    private ImageView mImageView;
+
     private TransitionDrawable mTransitionDrawable;
     private AlphaAnimation mFadeOut = new AlphaAnimation(1.0f, 0.0f);
     private AlphaAnimation mFadeIn = new AlphaAnimation(0.0f, 1.0f);
@@ -32,26 +37,42 @@ public class MainActivity extends AppCompatActivity {
     private int mRandomTime;
     private int mTransitionTime = 500;
 
+    private ScoreDbHelper mDbHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
 
+        mImageView = (ImageView) findViewById(R.id.scoreboard_image_view);
+//        mImageView.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FFFFFF")));
+        mImageView.setVisibility(View.VISIBLE);
+
+        mImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("MainActivity", "IMGE VIEW WAS CLICKED!!");
+            }
+        });
+
         Random random = new Random();
         mRandomTime = random.nextInt(10000 - 1000) + 1000;
 
         mInstructionTextView = (TextView) findViewById(R.id.instruction_text_view);
-        mMainLinearLayout = (LinearLayout) findViewById(R.id.main_linear_layout);
+        mMainLayout = (RelativeLayout) findViewById(R.id.main_layout);
 
-        mTransitionDrawable = (TransitionDrawable) mMainLinearLayout.getBackground();
+        mTransitionDrawable = (TransitionDrawable) mMainLayout.getBackground();
 
-        mMainLinearLayout.setOnClickListener(new View.OnClickListener() {
+        mMainLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!mGameStart) {
                     Log.d(TAG, "Animation should start.");
-
+                    mImageView.animate()
+                            .alpha(0.0f)
+                            .setDuration(500);
+                    mImageView.setClickable(false);
                     mGameStart = true;
 
                     animateTextOut();
@@ -67,17 +88,20 @@ public class MainActivity extends AppCompatActivity {
 
                 }
 
-                mMainLinearLayout.setOnTouchListener(new View.OnTouchListener() {
+                mMainLayout.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
                         if (!mFailScreen) {
                             mFailScreen = true;
-                            mMainLinearLayout.setOnTouchListener(null);
+                            mMainLayout.setOnTouchListener(null);
+
+                            animateButtonIn();
+
                             mGameOver = true;
                             Log.d(TAG, "Game over");
-//                        mMainLinearLayout.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.startGame));
-                            mMainLinearLayout.setBackground(ContextCompat.getDrawable(MainActivity.this, R.drawable.colour_transition3));
-                            mTransitionDrawable = (TransitionDrawable) mMainLinearLayout.getBackground();
+//                        mMainLayout.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.startGame));
+                            mMainLayout.setBackground(ContextCompat.getDrawable(MainActivity.this, R.drawable.colour_transition3));
+                            mTransitionDrawable = (TransitionDrawable) mMainLayout.getBackground();
                             mTransitionDrawable.startTransition(mTransitionTime);
 
                             animateTextIn("You tapped too early! Try again.");
@@ -99,28 +123,33 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mDbHelper = new ScoreDbHelper(getApplicationContext());
+
+    }
+
+    private void insertData() {
+
     }
 
     public void onTimeReached() {
-
-        final MediaPlayer player = MediaPlayer.create(MainActivity.this, R.raw.ding);
-        player.start();
 
         if (!mGameOver) {
 
             final long startTime = SystemClock.elapsedRealtime();
 
-            mMainLinearLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.promptClick));
-            mMainLinearLayout.setBackground(ContextCompat.getDrawable(this, R.drawable.colour_transition2));
-            mTransitionDrawable = (TransitionDrawable) mMainLinearLayout.getBackground();
+            mMainLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.promptClick));
+            mMainLayout.setBackground(ContextCompat.getDrawable(this, R.drawable.colour_transition2));
+            mTransitionDrawable = (TransitionDrawable) mMainLayout.getBackground();
 
-            mMainLinearLayout.setOnTouchListener(new View.OnTouchListener() {
+            mMainLayout.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
 
                     if (!mGameOver) {
                         mGameOver = true;
-                        mMainLinearLayout.setOnTouchListener(null);
+                        mMainLayout.setOnTouchListener(null);
+
+                        animateButtonIn();
                         Log.d(TAG, "Game over");
 
                         long endTime = SystemClock.elapsedRealtime();
@@ -149,9 +178,16 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void animateButtonIn() {
+        mImageView.animate()
+                .alpha(1.0f)
+                .setDuration(500);
+        mImageView.setClickable(true);
+    }
+
     private void setResetOnClickListener() {
-        mMainLinearLayout.setOnTouchListener(null);
-        mMainLinearLayout.setOnClickListener(new View.OnClickListener() {
+        mMainLayout.setOnTouchListener(null);
+        mMainLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, MainActivity.class);

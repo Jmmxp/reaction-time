@@ -7,6 +7,8 @@
     <color name="startGame">#FFFFFF</color>
     <color name="earlyClick">#FF7083</color>
     <color name="promptClick">#F7233F</color>
+    <color name="fabBackground">#FFFFFF</color>
+    <!--#4B89CF fabBackground colour (old)-->
     <!-- Darker red. #F7233F; Original pink I used: #E85DB5-->
     <color name="endGame">#91F657</color>
 </resources>
