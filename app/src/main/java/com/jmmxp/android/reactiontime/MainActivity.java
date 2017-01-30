@@ -1,10 +1,9 @@
 package com.jmmxp.android.reactiontime;
 
-import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -39,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean mFailScreen = false;
     private int mRandomTime;
     private int mTransitionTime = 500;
+    private boolean mScoreShowing = false;
 
     private long[] mScores;
 
@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
         mImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("MainActivity", "IMGE VIEW WAS CLICKED!!");
                 showScoreboard();
             }
         });
@@ -75,10 +74,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (!mGameStart) {
                     Log.d(TAG, "Animation should start.");
-                    mImageView.animate()
-                            .alpha(0.0f)
-                            .setDuration(500);
-                    mImageView.setClickable(false);
+                    animateImageOut();
                     mGameStart = true;
 
                     animateTextOut();
@@ -101,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                             mFailScreen = true;
                             mMainLayout.setOnTouchListener(null);
 
-                            animateButtonIn();
+                            animateImageIn();
 
                             mGameOver = true;
                             Log.d(TAG, "Game over");
@@ -143,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         outState.putSerializable(EXTRA_SCORES, mScores);
     }
 
@@ -168,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
                         mGameOver = true;
                         mMainLayout.setOnTouchListener(null);
 
-                        animateButtonIn();
+                        animateImageIn();
                         Log.d(TAG, "Game over");
 
                         long endTime = SystemClock.elapsedRealtime();
@@ -204,11 +201,12 @@ public class MainActivity extends AppCompatActivity {
                 mScores[i] = score;
                 break;
             } else if (score < mScores[i]) {
-                for (int j = mScores.length; j > i; j--) {
+                for (int j = mScores.length - 1; j > i; j--) {
                     long secondScore = mScores[j - 1];
                     mScores[j] = secondScore;
                 }
                 mScores[i] = score;
+                break;
             }
         }
 
@@ -222,17 +220,21 @@ public class MainActivity extends AppCompatActivity {
 
         for (int i = 0; i < mScores.length; i++) {
             if (mScores[i] != 0) {
-                mScoreboardTextView.setText(mScoreboardTextView.getText().toString() + (i + 1) + ". " + mScores[i] + "\n");
+                mScoreboardTextView.setText(mScoreboardTextView.getText() + String.valueOf(mScores[i] + "\n"));
                 scoreExists = true;
             }
         }
 
         if (!scoreExists) {
-            mScoreboardTextView.setText(R.string.empty_scoreboard);
+            mScoreboardTextView.setText(getString(R.string.empty_scoreboard));
+        } else {
+            mScoreboardTextView.setText(getString(R.string.scoreboard_header) + "\n\n" + mScoreboardTextView.getText());
         }
     }
 
     private void showScoreboard() {
+        mScoreShowing = true;
+
         mScoreboardTextView.setVisibility(View.VISIBLE);
         mScoreboardTextView.startAnimation(mFadeIn);
         mFadeIn.setDuration(mTransitionTime);
@@ -241,17 +243,51 @@ public class MainActivity extends AppCompatActivity {
         mInstructionTextView.startAnimation(mFadeOut);
         mFadeOut.setDuration(mTransitionTime);
         mFadeOut.setFillAfter(true);
+        mInstructionTextView.setVisibility(View.GONE);
+
+        mImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideScoreboard();
+            }
+        });
+
     }
 
     private void hideScoreboard() {
+        mScoreShowing = false;
+
+        mInstructionTextView.setVisibility(View.VISIBLE);
+        mInstructionTextView.startAnimation(mFadeIn);
+        mFadeIn.setDuration(mTransitionTime);
+        mFadeIn.setFillAfter(true);
+
+        mScoreboardTextView.startAnimation(mFadeOut);
+        mFadeOut.setDuration(mTransitionTime);
+        mFadeOut.setFillAfter(true);
+        mScoreboardTextView.setVisibility(View.GONE);
+
+        mImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showScoreboard();
+            }
+        });
 
     }
 
-    private void animateButtonIn() {
+    private void animateImageIn() {
         mImageView.animate()
                 .alpha(1.0f)
                 .setDuration(500);
         mImageView.setClickable(true);
+    }
+
+    private void animateImageOut()  {
+        mImageView.animate()
+                .alpha(0.0f)
+                .setDuration(500);
+        mImageView.setClickable(false);
     }
 
     private void setResetOnClickListener() {
@@ -259,10 +295,10 @@ public class MainActivity extends AppCompatActivity {
         mMainLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                startActivity(intent);
-                overridePendingTransition(0, 0);
+//                Intent intent = new Intent(MainActivity.this, MainActivity.class);
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+//                startActivity(intent);
+                recreate();
             }
         });
     }
@@ -275,9 +311,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void animateTextOut() {
-        mInstructionTextView.startAnimation(mFadeOut);
-        mFadeOut.setDuration(mTransitionTime);
-        mFadeOut.setFillAfter(true);
+        if (mScoreShowing) {
+            mInstructionTextView.clearAnimation();
+            Log.v("MainActivity", "Scoreboard text view is animating out.");
+            mScoreboardTextView.startAnimation(mFadeOut);
+            mFadeOut.setDuration(mTransitionTime);
+            mFadeOut.setFillAfter(true);
+
+        } else {
+            mScoreboardTextView.clearAnimation();
+            Log.v("MainActivity", "Instruction text view is animating out.");
+            mInstructionTextView.startAnimation(mFadeOut);
+            mFadeOut.setDuration(mTransitionTime);
+            mFadeOut.setFillAfter(true);
+        }
     }
 
 }

@@ -17,6 +17,7 @@ public final class ScoreContract {
         public static final String TABLE_NAME = "scores";
 
         public static final String _ID = BaseColumns._ID;
+        public static final String COLUMN_NUMBER = "number";
         public static final String COLUMN_TIME = "time";
 
     }
