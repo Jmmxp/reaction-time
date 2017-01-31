@@ -87,8 +87,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "Animation should start.");
                     animateImageOut();
                     mGameStart = true;
-
                     animateTextOut();
+                    mScoreShowing = false;
 
                     mTransitionDrawable.startTransition(mTransitionTime);
                     final Handler handler = new Handler();
@@ -107,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
                         if (!mFailScreen) {
                             mFailScreen = true;
                             mMainLayout.setOnTouchListener(null);
-
                             animateImageIn();
 
                             mGameOver = true;
@@ -179,7 +178,6 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             int i = 0;
-            cursor.moveToFirst();
             while (cursor.moveToNext()) {
                 long score = cursor.getLong(timeColumnIndex);
                 System.out.println("Score at row " + (i + 1) + " is " + score);
@@ -204,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
             ContentValues values = new ContentValues();
             values.put(ScoreEntry.COLUMN_TIME, mScores[position]);
 
-            String selection = ScoreEntry.COLUMN_SCORE_NUMBER + " LIKE ?";
+            String selection = ScoreEntry.COLUMN_SCORE_NUMBER + " = ?";
             String[] selectionArgs = {String.valueOf(position + 1)};
 
             int count = db.update(
@@ -213,12 +211,14 @@ public class MainActivity extends AppCompatActivity {
                     selection,
                     selectionArgs);
 
+            System.out.println("Number of rows affected: " + count);
+
         } else {
             for (int i = 0; i < mScores.length; i++) {
                 ContentValues values = new ContentValues();
                 values.put(ScoreEntry.COLUMN_TIME, mScores[i]);
 
-                String selection = ScoreEntry.COLUMN_SCORE_NUMBER + " LIKE ?";
+                String selection = ScoreEntry.COLUMN_SCORE_NUMBER + " = ?";
                 String[] selectionArgs = {String.valueOf(i + 1)};
 
                 int count = db.update(
@@ -226,13 +226,12 @@ public class MainActivity extends AppCompatActivity {
                         values,
                         selection,
                         selectionArgs);
+
+                System.out.println("Number of rows affected: " + count);
+
             }
         }
 
-
-    }
-
-    private void deleteData() {
 
     }
 

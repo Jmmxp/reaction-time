@@ -32,7 +32,7 @@ public class ScoreDbHelper extends SQLiteOpenHelper {
 
 
 
-        for (int i = 1; i <= 6; i++) {
+        for (int i = 1; i < 6; i++) {
             String SQL_CREATE_ROW = "INSERT INTO " + ScoreEntry.TABLE_NAME + "(" +
                     ScoreEntry.COLUMN_SCORE_NUMBER + ", " +
                     ScoreEntry.COLUMN_TIME + ") " +
