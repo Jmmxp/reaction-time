@@ -1,6 +1,8 @@
 package com.jmmxp.android.reactiontime;
 
-import android.graphics.Color;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -15,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.jmmxp.android.reactiontime.data.ScoreContract.ScoreEntry;
 import com.jmmxp.android.reactiontime.data.ScoreDbHelper;
 
 import java.util.Random;
@@ -49,6 +52,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
+
+        mDbHelper = new ScoreDbHelper(this);
+        if (savedInstanceState != null) {
+            mScores = (long[]) savedInstanceState.getSerializable(EXTRA_SCORES);
+        } else {
+            mScores = new long[5];
+        }
+        readData();
 
         mImageView = (ImageView) findViewById(R.id.scoreboard_image_view);
         mImageView.setVisibility(View.VISIBLE);
@@ -125,15 +136,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        if (savedInstanceState != null) {
-            mScores = (long[]) savedInstanceState.getSerializable(EXTRA_SCORES);
-        } else {
-            mScores = new long[]{0, 0, 0, 0, 0};
-        }
+
 
         checkScore();
 
-        mDbHelper = new ScoreDbHelper(getApplicationContext());
 
     }
 
@@ -143,7 +149,90 @@ public class MainActivity extends AppCompatActivity {
         outState.putSerializable(EXTRA_SCORES, mScores);
     }
 
-    private void insertData() {
+    @Override
+    protected void onDestroy() {
+        mDbHelper.close();
+        super.onDestroy();
+    }
+
+    private void readData() {
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        String[] projection  = {
+                ScoreEntry.COLUMN_TIME
+        };
+
+        Cursor cursor = db.query(
+                ScoreEntry.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                null);
+
+        Log.v("MainActivity", "Cursor has " + cursor.getCount() + " rows");
+
+        int timeColumnIndex = cursor.getColumnIndex(ScoreEntry.COLUMN_TIME);
+
+        long[] tempScore = new long[5];
+
+        try {
+            int i = 0;
+            cursor.moveToFirst();
+            while (cursor.moveToNext()) {
+                long score = cursor.getLong(timeColumnIndex);
+                System.out.println("Score at row " + (i + 1) + " is " + score);
+                mScores[i] = score;
+                tempScore[i] = score;
+                i++;
+            }
+        } finally {
+            cursor.close();
+        }
+
+        for (int i = 0; i < 5; i++) {
+            System.out.println("tempScore array at " + i + " is " + tempScore[i]);
+        }
+
+    }
+
+    private void updateData(int position) {
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        if (position != -1) {
+            ContentValues values = new ContentValues();
+            values.put(ScoreEntry.COLUMN_TIME, mScores[position]);
+
+            String selection = ScoreEntry.COLUMN_SCORE_NUMBER + " LIKE ?";
+            String[] selectionArgs = {String.valueOf(position + 1)};
+
+            int count = db.update(
+                    ScoreEntry.TABLE_NAME,
+                    values,
+                    selection,
+                    selectionArgs);
+
+        } else {
+            for (int i = 0; i < mScores.length; i++) {
+                ContentValues values = new ContentValues();
+                values.put(ScoreEntry.COLUMN_TIME, mScores[i]);
+
+                String selection = ScoreEntry.COLUMN_SCORE_NUMBER + " LIKE ?";
+                String[] selectionArgs = {String.valueOf(i + 1)};
+
+                int count = db.update(
+                        ScoreEntry.TABLE_NAME,
+                        values,
+                        selection,
+                        selectionArgs);
+            }
+        }
+
+
+    }
+
+    private void deleteData() {
 
     }
 
@@ -199,6 +288,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < mScores.length; i++) {
             if (mScores[i] == 0) {
                 mScores[i] = score;
+                updateData(i);
                 break;
             } else if (score < mScores[i]) {
                 for (int j = mScores.length - 1; j > i; j--) {
@@ -206,6 +296,7 @@ public class MainActivity extends AppCompatActivity {
                     mScores[j] = secondScore;
                 }
                 mScores[i] = score;
+                updateData(-1);
                 break;
             }
         }

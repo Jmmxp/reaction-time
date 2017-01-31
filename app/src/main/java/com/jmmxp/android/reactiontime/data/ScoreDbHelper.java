@@ -3,6 +3,7 @@ package com.jmmxp.android.reactiontime.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.jmmxp.android.reactiontime.data.ScoreContract.ScoreEntry;
 
@@ -24,9 +25,22 @@ public class ScoreDbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String SQL_CREATE_COMMAND = "CREATE TABLE " + ScoreEntry.TABLE_NAME + "(" +
                 ScoreEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                ScoreEntry.COLUMN_SCORE_NUMBER + " INTEGER NOT NULL, " +
                 ScoreEntry.COLUMN_TIME + " INTEGER NOT NULL);";
 
         db.execSQL(SQL_CREATE_COMMAND);
+
+
+
+        for (int i = 1; i <= 6; i++) {
+            String SQL_CREATE_ROW = "INSERT INTO " + ScoreEntry.TABLE_NAME + "(" +
+                    ScoreEntry.COLUMN_SCORE_NUMBER + ", " +
+                    ScoreEntry.COLUMN_TIME + ") " +
+                    "VALUES (" + i + ", 0);";
+            db.execSQL(SQL_CREATE_ROW);
+        }
+
+        Log.v("ScoreDbHelper",  "onCreate of ScoreDbHelper called.");
 
     }
 
